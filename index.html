@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Ofuscador Lua Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            width: 100%;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0 24px;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #58a6ff, #bc8cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .badge {
+            background: #21262d;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #8b949e;
+            border: 1px solid #30363d;
+        }
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 800px) {
+            .editor-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .panel {
+            background: #161b22;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #0d1117;
+            border-bottom: 1px solid #21262d;
+            font-size: 14px;
+            font-weight: 600;
+            color: #8b949e;
+        }
+        .panel-header .count {
+            background: #21262d;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #58a6ff;
+        }
+        textarea {
+            width: 100%;
+            height: 500px;
+            padding: 16px;
+            background: transparent;
+            border: none;
+            color: #e6edf3;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            tab-size: 4;
+        }
+        textarea::placeholder {
+            color: #3d444d;
+        }
+        .options-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            padding: 16px 20px;
+            background: #0d1117;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .options-bar label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #c9d1d9;
+            user-select: none;
+        }
+        .options-bar input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: #58a6ff;
+            cursor: pointer;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: #238636;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #2ea043;
+            transform: scale(1.02);
+        }
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+        .btn-danger {
+            background: #da3633;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #f85149;
+        }
+        .footer {
+            text-align: center;
+            padding: 24px 0 8px;
+            color: #3d444d;
+            font-size: 13px;
+            border-top: 1px solid #21262d;
+            margin-top: 20px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #238636;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast.error {
+            background: #da3633;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>⚡ Ofuscador Lua</h1>
+        <span class="badge">🔒 100% local · sin servidor</span>
+    </header>
+
+    <div class="options-bar">
+        <label><input type="checkbox" id="optRename" checked> Renombrar variables</label>
+        <label><input type="checkbox" id="optStrings" checked> Codificar strings</label>
+        <label><input type="checkbox" id="optNumbers" checked> Ofuscar números</label>
+        <label><input type="checkbox" id="optMinify" checked> Minificar</label>
+        <div class="btn-group">
+            <button class="btn btn-primary" id="btnObfuscate">🔮 Ofuscar</button>
+            <button class="btn btn-secondary" id="btnCopy">📋 Copiar</button>
+            <button class="btn btn-secondary" id="btnDownload">⬇️ Descargar</button>
+            <button class="btn btn-danger" id="btnClear">🗑️ Limpiar</button>
+        </div>
+    </div>
+
+    <div class="editor-grid">
+        <div class="panel">
+            <div class="panel-header">
+                <span>📝 Código fuente (Lua)</span>
+                <span class="count" id="inputCount">0 líneas</span>
+            </div>
+            <textarea id="inputCode" placeholder="-- Escribe o pega tu script Lua aquí...&#10;local saludo = &quot;Hola mundo&quot;&#10;function prueba(x)&#10;    return x * 2&#10;end">-- Ejemplo avanzado
+local mensaje = "Hola ofuscador"
+local numero = 42
+
+function saludar(nombre)
+    print("Saludos, " .. nombre)
+    return true
+end
+
+-- Esta función calcula el cuadrado
+local function cuadrado(n)
+    return n * n
+end
+
+print(cuadrado(5))</textarea>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <span>🔮 Código ofuscado</span>
+                <span class="count" id="outputCount">0 líneas</span>
+            </div>
+            <textarea id="outputCode" placeholder="El código ofuscado aparecerá aquí..." readonly></textarea>
+        </div>
+    </div>
+
+    <div class="footer">
+        ⚙️ Ofuscación con renombre local, codificación de strings, ofuscación numérica y minificación.
+    </div>
+</div>
+
+<div id="toast" class="toast">✅ ¡Listo!</div>
+
+<script>
+    (function() {
+        // ---------- CONFIGURACIÓN ----------
+        const KEYWORDS = new Set([
+            'and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for',
+            'function', 'goto', 'if', 'in', 'local', 'nil', 'not', 'or',
+            'repeat', 'return', 'then', 'true', 'until', 'while'
+        ]);
+        const BUILTINS = new Set([
+            '_G', '_VERSION', 'arg', 'assert', 'collectgarbage', 'coroutine',
+            'debug', 'dofile', 'error', 'getfenv', 'getmetatable', 'io',
+            'ipairs', 'load', 'loadfile', 'loadstring', 'math', 'next', 'os',
+            'package', 'pairs', 'print', 'rawequal', 'rawget', 'rawlen',
+            'rawset', 'select', 'setfenv', 'setmetatable', 'string', 'table',
+            'tonumber', 'tostring', 'type', 'xpcall', 'utf8'
+        ]);
+        const RESERVED = new Set([...KEYWORDS, ...BUILTINS]);
+
+        // ---------- TOKENIZER ----------
+        function tokenize(code) {
+            const tokens = [];
+            let i = 0;
+            const n = code.length;
+
+            while (i < n) {
+                let ch = code[i];
+
+                // Whitespace
+                if (/\s/.test(ch)) {
+                    let val = '';
+                    while (i < n && /\s/.test(code[i])) { val += code[i]; i++; }
+                    tokens.push({ type: 'WHITESPACE', value: val });
+                    continue;
+                }
+
+                // Single-line comment --
+                if (ch === '-' && i + 1 < n && code[i + 1] === '-') {
+                    let next = (i + 2 < n) ? code[i + 2] : '';
+                    if (next === '[' && i + 3 < n && code[i + 3] === '[') {
+                        // Long comment --[[ ... ]]
+                        let start = i;
+                        i += 4;
+                        while (i + 1 < n && !(code[i] === ']' && code[i + 1] === ']')) i++;
+                        i += 2;
+                        tokens.push({ type: 'COMMENT', value: code.substring(start, i) });
+                        continue;
+                    } else {
+                        let start = i;
+                        i += 2;
+                        while (i < n && code[i] !== '\n' && code[i] !== '\r') i++;
+                        tokens.push({ type: 'COMMENT', value: code.substring(start, i) });
+                        continue;
+                    }
+                }
+
+                // String: "..." or '...'
+                if (ch === '"' || ch === "'") {
+                    const quote = ch;
+                    let start = i;
+                    i++;
+                    while (i < n && code[i] !== quote) {
+                        if (code[i] === '\\' && i + 1 < n) i += 2;
+                        else i++;
+                    }
+                    if (i < n && code[i] === quote) i++;
+                    tokens.push({ type: 'STRING', value: code.substring(start, i) });
+                    continue;
+                }
+
+                // Long string [[ ... ]]
+                if (ch === '[' && i + 1 < n && code[i + 1] === '[') {
+                    let start = i;
+                    i += 2;
+                    while (i + 1 < n && !(code[i] === ']' && code[i + 1] === ']')) i++;
+                    i += 2;
+                    tokens.push({ type: 'STRING', value: code.substring(start, i) });
+                    continue;
+                }
+
+                // Number
+                if (/[0-9]/.test(ch) || (ch === '.' && i + 1 < n && /[0-9]/.test(code[i + 1]))) {
+                    let val = '';
+                    while (i < n && /[0-9a-fA-FxX.]/.test(code[i])) { val += code[i]; i++; }
+                    tokens.push({ type: 'NUMBER', value: val });
+                    continue;
+                }
+
+                // Identifier
+                if (/[a-zA-Z_]/.test(ch)) {
+                    let val = '';
+                    while (i < n && /[a-zA-Z0-9_]/.test(code[i])) { val += code[i]; i++; }
+                    tokens.push({ type: 'IDENTIFIER', value: val });
+                    continue;
+                }
+
+                // Symbols (multi-char)
+                let sym = '';
+                const multi = {
+                    '~=': true, '>=': true, '<=': true, '==': true,
+                    '..': true, '...': true, '<<': true, '>>': true,
+                    '//': true, '/*': true, '*/': true
+                };
+                if (i + 1 < n) {
+                    const two = ch + code[i + 1];
+                    if (multi[two]) {
+                        sym = two;
+                        i += 2;
+                        tokens.push({ type: 'SYMBOL', value: sym });
+                        continue;
+                    }
+                }
+                sym = ch;
+                i++;
+                tokens.push({ type: 'SYMBOL', value: sym });
+            }
+            return tokens;
+        }
+
+        // ---------- OFUSCADOR ----------
+        function obfuscate(code, opts) {
+            const tokens = tokenize(code);
+            const output = [];
+            const renameMap = new Map();
+            let nextId = 0;
+            let lastToken = null;
+
+            // Primera pasada: recolectar nombres a renombrar (locals y funciones)
+            if (opts.rename) {
+                for (let idx = 0; idx < tokens.length; idx++) {
+                    const t = tokens[idx];
+                    // local VAR
+                    if (t.type === 'IDENTIFIER' && t.value === 'local') {
+                        let j = idx + 1;
+                        while (j < tokens.length && tokens[j].type === 'WHITESPACE') j++;
+                        if (j < tokens.length && tokens[j].type === 'IDENTIFIER') {
+                            const name = tokens[j].value;
+                            if (!RESERVED.has(name) && !renameMap.has(name)) {
+                                renameMap.set(name, '_0x' + (nextId++).toString(16).padStart(2, '0'));
+                            }
+                        }
+                    }
+                    // function NAME
+                    if (t.type === 'IDENTIFIER' && t.value === 'function') {
+                        let j = idx + 1;
+                        while (j < tokens.length && tokens[j].type === 'WHITESPACE') j++;
+                        if (j < tokens.length && tokens[j].type === 'IDENTIFIER') {
+                            const name = tokens[j].value;
+                            if (!RESERVED.has(name) && !renameMap.has(name)) {
+                                renameMap.set(name, '_0x' + (nextId++).toString(16).padStart(2, '0'));
+                            }
+                        }
+                    }
+                    // function Class:method -> skip method because it's a string key
+                }
+            }
+
+            // Segunda pasada: generar salida
+            for (let idx = 0; idx < tokens.length; idx++) {
+                const t = tokens[idx];
+
+                // Saltar comentarios si minify
+                if (opts.minify && t.type === 'COMMENT') {
+                    continue;
+                }
+
+                // Ofuscar números
+                if (opts.numbers && t.type === 'NUMBER') {
+                    const num = t.value;
+                    if (/^[0-9]+$/.test(num)) {
+                        const n = parseInt(num, 10);
+                        if (!isNaN(n) && n >= 0) {
+                            output.push('(0x' + n.toString(16).toUpperCase() + ')');
+                            lastToken = t;
+                            continue;
+                        }
+                    }
+                    // Si es hexadecimal o decimal con punto, lo dejamos igual
+                    output.push(t.value);
+                    lastToken = t;
+                    continue;
+                }
+
+                // Ofuscar strings
+                if (opts.strings && t.type === 'STRING') {
+                    const raw = t.value;
+                    const quote = raw[0];
+                    let content = raw.substring(1, raw.length - 1);
+                    // Decodificar escapes básicos para obtener bytes reales
+                    let bytes = [];
+                    let j = 0;
+                    while (j < content.length) {
+                        let ch = content[j];
+                        if (ch === '\\' && j + 1 < content.length) {
+                            const esc = content[j + 1];
+                            if (esc === 'n') { bytes.push(10); j += 2; }
+                            else if (esc === 'r') { bytes.push(13); j += 2; }
+                            else if (esc === 't') { bytes.push(9); j += 2; }
+                            else if (esc === '\\') { bytes.push(92); j += 2; }
+                            else if (esc === '"') { bytes.push(34); j += 2; }
+                            else if (esc === "'") { bytes.push(39); j += 2; }
+                            else if (esc === 'z') { // skip whitespace
+                                j += 2;
+                                while (j < content.length && /\s/.test(content[j])) j++;
+                            } else if (esc === 'x' && j + 3 < content.length) {
+                                const hex = content.substring(j + 2, j + 4);
+                                bytes.push(parseInt(hex, 16));
+                                j += 4;
+                            } else if (/[0-9]/.test(esc) && j + 3 < content.length) {
+                                // decimal escape \ddd
+                                const ddd = content.substring(j + 1, j + 4);
+                                bytes.push(parseInt(ddd, 10));
+                                j += 4;
+                            } else {
+                                bytes.push(ch.charCodeAt(0));
+                                j++;
+                            }
+                        } else {
+                            bytes.push(ch.charCodeAt(0));
+                            j++;
+                        }
+                    }
+                    if (bytes.length === 0) {
+                        output.push("''");
+                    } else {
+                        const parts = bytes.map(b => b.toString(10));
+                        output.push('string.char(' + parts.join(',') + ')');
+                    }
+                    lastToken = t;
+                    continue;
+                }
+
+                // Renombrar identificadores
+                if (opts.rename && t.type === 'IDENTIFIER') {
+                    // Si es palabra reservada, no renombrar
+                    if (RESERVED.has(t.value)) {
+                        output.push(t.value);
+                        lastToken = t;
+                        continue;
+                    }
+                    // Si está después de un punto '.' o dos puntos ':', es campo de tabla, no renombrar
+                    if (lastToken && lastToken.type === 'SYMBOL' && (lastToken.value === '.' || lastToken.value === ':')) {
+                        output.push(t.value);
+                        lastToken = t;
+                        continue;
+                    }
+                    // Si es un campo en table.key -> no renombrar
+                    // (ya cubierto por el punto)
+
+                    const newName = renameMap.get(t.value);
+                    if (newName) {
+                        output.push(newName);
+                    } else {
+                        output.push(t.value);
+                    }
+                    lastToken = t;
+                    continue;
+                }
+
+                // Default
+                output.push(t.value);
+                lastToken = t;
+            }
+
+            let result = output.join('');
+
+            // Minificar: colapsar espacios, saltos de línea, tabuladores
+            if (opts.minify) {
+                result = result.replace(/\s+/g, ' ');
+                // Limpiar espacios alrededor de símbolos comunes
+                result = result.replace(/\s*([{}()\[\],;:])\s*/g, '$1');
+                result = result.replace(/\s*([+\-*/%^#~=<>])\s*/g, '$1');
+                // Espacio necesario entre palabras clave y números/identificadores
+                result = result.replace(/\b(and|or|not|function|local|return|if|then|else|elseif|for|do|while|repeat|until|break|goto|end)\s+/g, '$1 ');
+                result = result.trim();
+            }
+
+            return result || '-- (código vacío)';
+        }
+
+        // ---------- UI ----------
+        const inputEl = document.getElementById('inputCode');
+        const outputEl = document.getElementById('outputCode');
+        const btnObfuscate = document.getElementById('btnObfuscate');
+        const btnCopy = document.getElementById('btnCopy');
+        const btnDownload = document.getElementById('btnDownload');
+        const btnClear = document.getElementById('btnClear');
+        const inputCount = document.getElementById('inputCount');
+        const outputCount = document.getElementById('outputCount');
+        const toast = document.getElementById('toast');
+
+        const optRename = document.getElementById('optRename');
+        const optStrings = document.getElementById('optStrings');
+        const optNumbers = document.getElementById('optNumbers');
+        const optMinify = document.getElementById('optMinify');
+
+        function updateCounts() {
+            inputCount.textContent = inputEl.value.split('\n').length + ' líneas';
+            outputCount.textContent = outputEl.value.split('\n').length + ' líneas';
+        }
+
+        function showToast(msg, isError = false) {
+            toast.textContent = msg;
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.classList.add('show');
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function doObfuscate() {
+            try {
+                const src = inputEl.value;
+                if (!src.trim()) {
+                    showToast('⚠️ Escribe o pega código Lua primero', true);
+                    return;
+                }
+                const opts = {
+                    rename: optRename.checked,
+                    strings: optStrings.checked,
+                    numbers: optNumbers.checked,
+                    minify: optMinify.checked
+                };
+                const start = performance.now();
+                const result = obfuscate(src, opts);
+                const end = performance.now();
+                outputEl.value = result;
+                updateCounts();
+                showToast(`✅ Ofuscado en ${(end - start).toFixed(1)}ms`);
+            } catch (e) {
+                showToast('❌ Error: ' + e.message, true);
+                console.error(e);
+            }
+        }
+
+        function copyOutput() {
+            const text = outputEl.value;
+            if (!text) { showToast('⚠️ No hay código para copiar', true); return; }
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('📋 Copiado al portapapeles');
+            }).catch(() => {
+                outputEl.select();
+                document.execCommand('copy');
+                showToast('📋 Copiado');
+            });
+        }
+
+        function downloadOutput() {
+            const text = outputEl.value;
+            if (!text) { showToast('⚠️ No hay código para descargar', true); return; }
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ofuscado.lua';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('⬇️ Descargado como ofuscado.lua');
+        }
+
+        function clearAll() {
+            inputEl.value = '';
+            outputEl.value = '';
+            updateCounts();
+            showToast('🗑️ Limpiado');
+        }
+
+        // Eventos
+        btnObfuscate.addEventListener('click', doObfuscate);
+        btnCopy.addEventListener('click', copyOutput);
+        btnDownload.addEventListener('click', downloadOutput);
+        btnClear.addEventListener('click', clearAll);
+
+        inputEl.addEventListener('input', updateCounts);
+        outputEl.addEventListener('input', updateCounts);
+
+        // Atajo: Ctrl+Enter para ofuscar
+        inputEl.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                doObfuscate();
+            }
+        });
+
+        // Ejecutar al cargar con el ejemplo
+        updateCounts();
+        setTimeout(doObfuscate, 100);
+
+        // Exponer para depuración
+        window.obfuscate = obfuscate;
+    })();
+</script>
+</body>
+</html>
