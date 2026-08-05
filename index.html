@@ -140,7 +140,7 @@
 </div>
 
 <script>
-    // Lista fija de 16 emojis para mapear la notación Hexadecimal (0-F)
+    // 16 emojis exactos para representar los nibbles (0-F)
     const EMOJI_MAP = [
         "🔥", "💀", "🤡", "🚀", "⚡", "✨", "🎉", "👑", 
         "🤖", "🎃", "👻", "👾", "💎", "🛡️", "⚔️", "🌀"
@@ -149,7 +149,7 @@
     function obfuscateScript() {
         const input = document.getElementById("inputScript").value;
         if (!input.trim()) {
-            alert("Por favor ingresa un script válido para obfuscar.");
+            alert("Por favor ingresa un script válido.");
             return;
         }
 
@@ -157,7 +157,7 @@
         const encoder = new TextEncoder();
         const bytes = encoder.encode(input);
 
-        // Convertir cada byte a par de emojis (Hexadecimal)
+        // Convertir cada byte en 2 emojis (Hexadecimal)
         let emojiSequence = "";
         for (let i = 0; i < bytes.length; i++) {
             let hex = bytes[i].toString(16).padStart(2, '0');
@@ -166,27 +166,36 @@
             emojiSequence += EMOJI_MAP[high] + EMOJI_MAP[low];
         }
 
-        // Construir el mapeo inverso para el loader de Lua
+        // Mapeo inverso escrito limpia y seguramente para JS
         let luaMapTable = "{\n";
         EMOJI_MAP.forEach((emoji, index) => {
             luaMapTable += `    ["${emoji}"] = ${index},\n`;
         });
         luaMapTable += "}";
 
-        // Plantilla del Loader compatible con Lua 5.1+, Luau y Executors
+        // Loader de Lua optimizado para Luau/Delta/Executors sin caracteres conflictivos
         const luaLoader = `-- Obfuscated with Emoji Engine
 local _E = "${emojiSequence}"
 local _M = ${luaMapTable}
 
-local function _D(_str)
+local function _D(_s)
     local _b = {}
-    local _chars = {}
-    for c in string.gmatch(_str, "[%z\1-\127\194-\244][\128-\191]*") do
-        table.insert(_chars, c)
+    local _e = {}
+    
+    -- Extraer emojis usando utf8 o patrones seguros
+    if utf8 and utf8.codes then
+        for _, p in utf8.codes(_s) do
+            table.insert(_e, utf8.char(p))
+        end
+    else
+        for c in string.gmatch(_s, "[\\192-\\253][\\128-\\191]*|.") do
+            table.insert(_e, c)
+        end
     end
-    for i = 1, #_chars, 2 do
-        local _h = _M[_chars[i]]
-        local _l = _M[_chars[i+1]]
+    
+    for i = 1, #_e, 2 do
+        local _h = _M[_e[i]]
+        local _l = _M[_e[i+1]]
         if _h and _l then
             table.insert(_b, string.char(_h * 16 + _l))
         end
@@ -200,7 +209,7 @@ local _exec, _err = _run(_code)
 if _exec then
     _exec()
 else
-    error("Error al ejecutar el script: " .. tostring(_err))
+    error("Error de ejecucion: " .. tostring(_err))
 end`;
 
         document.getElementById("outputScript").value = luaLoader;
