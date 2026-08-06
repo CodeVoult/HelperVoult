@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emoji Script Obfuscator</title>
+    <title>Emoji Obfuscator</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         }
 
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: #000000;
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,25 +24,38 @@
 
         .container {
             width: 100%;
-            max-width: 900px;
-            background: #1e293b;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            border: 1px solid #334155;
+            max-width: 950px;
+            background: #000000;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #222222;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.03);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
         }
 
         h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #38bdf8;
             font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        p.subtitle {
+            font-size: 0.85rem;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .editor-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
 
         @media (min-width: 768px) {
@@ -55,161 +68,187 @@
         .box {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         label {
-            font-size: 0.9rem;
-            color: #94a3b8;
+            font-size: 0.8rem;
+            color: #888888;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         textarea {
             width: 100%;
-            height: 250px;
-            background-color: #090d16;
-            color: #38bdf8;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 12px;
-            font-family: 'Courier New', Courier, monospace;
+            height: 280px;
+            background-color: #050505;
+            color: #ffffff;
+            border: 1px solid #1c1c1c;
+            border-radius: 10px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
             font-size: 0.85rem;
             resize: vertical;
             outline: none;
+            transition: border-color 0.2s ease;
         }
 
         textarea:focus {
-            border-color: #38bdf8;
+            border-color: #ffffff;
+        }
+
+        textarea::placeholder {
+            color: #333333;
         }
 
         .btn-group {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 20px;
         }
 
         button {
             flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 14px;
+            border: 1px solid #ffffff;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: 0.2s ease-in-out;
+            transition: all 0.2s ease;
         }
 
         .btn-obfuscate {
-            background-color: #0284c7;
-            color: white;
+            background-color: #ffffff;
+            color: #000000;
         }
 
         .btn-obfuscate:hover {
-            background-color: #0369a1;
+            background-color: #e6e6e6;
         }
 
         .btn-copy {
-            background-color: #334155;
-            color: white;
+            background-color: #000000;
+            color: #ffffff;
+            border-color: #333333;
         }
 
         .btn-copy:hover {
-            background-color: #475569;
+            border-color: #ffffff;
+            background-color: #111111;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🔥 Emoji Obfuscator (Lua) 💀</h1>
+    <div class="header">
+        <h1>EMOJI OBFUSCATOR</h1>
+        <p class="subtitle">Lua & Luau Compatible</p>
+    </div>
     
     <div class="editor-container">
         <div class="box">
-            <label for="inputScript">Script Original (Lua):</label>
-            <textarea id="inputScript" placeholder="print('¡Hola Mundo!')"></textarea>
+            <label for="inputScript">Input Script</label>
+            <textarea id="inputScript" placeholder="print('Hello World!')"></textarea>
         </div>
         <div class="box">
-            <label for="outputScript">Script Obfuscado:</label>
-            <textarea id="outputScript" readonly placeholder="Tu script con emojis aparecerá aquí..."></textarea>
+            <label for="outputScript">Obfuscated Output</label>
+            <textarea id="outputScript" readonly placeholder="Obfuscated code will appear here..."></textarea>
         </div>
     </div>
 
     <div class="btn-group">
-        <button class="btn-obfuscate" onclick="obfuscateScript()">Obfuscar Script</button>
-        <button class="btn-copy" onclick="copyOutput()">Copiar Resultado</button>
+        <button class="btn-obfuscate" onclick="obfuscateScript()">Obfuscate</button>
+        <button class="btn-copy" onclick="copyOutput()">Copy Output</button>
     </div>
 </div>
 
 <script>
-    // 16 emojis exactos para representar los nibbles (0-F)
-    const EMOJI_MAP = [
-        "🔥", "💀", "🤡", "🚀", "⚡", "✨", "🎉", "👑", 
-        "🤖", "🎃", "👻", "👾", "💎", "🛡️", "⚔️", "🌀"
+    // Mapeo seguro de 65 caracteres (Base64 + Padding) a Emojis de un solo code point
+    const B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    const EMOJIS = [
+        "😀","😃","😄","😁","😆","😅","😂","🤣","🥲","🥹",
+        "😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗",
+        "😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓",
+        "😎","🥸","🤩","🥳","😏","😒","😞","😔","😟","😕",
+        "🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😮",
+        "😱","🥱","😤","😡","😠","🤬","😈","👿","💀","☠️",
+        "🤡","👹","👺","👻","👽"
     ];
 
     function obfuscateScript() {
         const input = document.getElementById("inputScript").value;
         if (!input.trim()) {
-            alert("Por favor ingresa un script válido.");
+            alert("Ingresa un script válido.");
             return;
         }
 
-        // Convertir string a bytes UTF-8
-        const encoder = new TextEncoder();
-        const bytes = encoder.encode(input);
-
-        // Convertir cada byte en 2 emojis (Hexadecimal)
-        let emojiSequence = "";
+        // Convertir texto a Base64 seguro UTF-8
+        const bytes = new TextEncoder().encode(input);
+        let binString = "";
         for (let i = 0; i < bytes.length; i++) {
-            let hex = bytes[i].toString(16).padStart(2, '0');
-            let high = parseInt(hex[0], 16);
-            let low = parseInt(hex[1], 16);
-            emojiSequence += EMOJI_MAP[high] + EMOJI_MAP[low];
+            binString += String.fromCharCode(bytes[i]);
+        }
+        const b64 = btoa(binString);
+
+        // Mapear cada carácter Base64 a su Emoji correspondiente
+        let emojiResult = [];
+        for (let i = 0; i < b64.length; i++) {
+            let char = b64[i];
+            let idx = B64_CHARS.indexOf(char);
+            emojiResult.push(EMOJIS[idx]);
         }
 
-        // Mapeo inverso escrito limpia y seguramente para JS
-        let luaMapTable = "{\n";
-        EMOJI_MAP.forEach((emoji, index) => {
-            luaMapTable += `    ["${emoji}"] = ${index},\n`;
-        });
-        luaMapTable += "}";
+        const emojiString = emojiResult.join("");
 
-        // Loader de Lua optimizado para Luau/Delta/Executors sin caracteres conflictivos
-        const luaLoader = `-- Obfuscated with Emoji Engine
-local _E = "${emojiSequence}"
-local _M = ${luaMapTable}
+        // Construir tabla de mapeo para Lua
+        let luaMap = "{\n";
+        for (let i = 0; i < B64_CHARS.length; i++) {
+            luaMap += `    ["${EMOJIS[i]}"] = "${B64_CHARS[i]}",\n`;
+        }
+        luaMap += "}";
+
+        // Loader nativo robusto
+        const luaLoader = `--[[ Emoji Obfuscator ]]--
+local _E = "${emojiString}"
+local _M = ${luaMap}
 
 local function _D(_s)
-    local _b = {}
-    local _e = {}
-    
-    -- Extraer emojis usando utf8 o patrones seguros
+    local _b64 = ""
     if utf8 and utf8.codes then
         for _, p in utf8.codes(_s) do
-            table.insert(_e, utf8.char(p))
+            local em = utf8.char(p)
+            if _M[em] then _b64 = _b64 .. _M[em] end
         end
     else
-        for c in string.gmatch(_s, "[\\192-\\253][\\128-\\191]*|.") do
-            table.insert(_e, c)
+        for em in string.gmatch(_s, "[%z\\1-\\127\\194-\\244][\\128-\\191]*") do
+            if _M[em] then _b64 = _b64 .. _M[em] end
         end
     end
     
-    for i = 1, #_e, 2 do
-        local _h = _M[_e[i]]
-        local _l = _M[_e[i+1]]
-        if _h and _l then
-            table.insert(_b, string.char(_h * 16 + _l))
-        end
-    end
-    return table.concat(_b)
+    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    _s = string.gsub(_b64, '[^'..b..'=]', '')
+    return (_s:gsub('.', function(x)
+        if (x == '=') then return '' end
+        local r,f='',(b:find(x)-1)
+        for i=6,1,-1 do r=r..(f%2^i - f%2^(i-1) > 0 and '1' or '0') end
+        return r
+    end):gsub('%d%d%d%d%d%d%d%d', function(x)
+        local c=0
+        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+        return string.char(c)
+    end))
 end
 
 local _code = _D(_E)
-local _run = loadstring or load
-local _exec, _err = _run(_code)
-if _exec then
-    _exec()
+local _exec = loadstring or load
+local _fn, _err = _exec(_code)
+if _fn then
+    _fn()
 else
-    error("Error de ejecucion: " .. tostring(_err))
+    error(_err)
 end`;
 
         document.getElementById("outputScript").value = luaLoader;
@@ -221,7 +260,7 @@ end`;
 
         output.select();
         navigator.clipboard.writeText(output.value);
-        alert("¡Script obfuscado copiado al portapapeles!");
+        alert("¡Copiado!");
     }
 </script>
 
